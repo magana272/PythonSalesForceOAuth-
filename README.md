@@ -65,3 +65,36 @@ Class: OAuth2
 | `__setup__()`        | Loads credentials from `salesforceconfig.ini`   |
 | `login()`            | Sends POST request to obtain access token       |
 | `get_account_info()` | Uses access token to retrieve account info      |
+
+
+
+## Main Functions
+```python
+
+class OAuth2:
+
+    ...
+
+    def login(self):
+        # Get access token: Saves in our config
+        try:
+            response = requests.post(self.base_url+"/services/oauth2/token", params = self.login_params)
+            if(response.status_code  != 200):
+                raise Exception("Request Failed")
+            responseJSON = response.json()
+            self.__set_auth_token__(responseJSON["access_token"]) 
+        except Exception as e:
+            print(e)
+
+    ...
+
+    def get_account_info(self):
+        # If token is present get out account data
+        if("access_token" in self.config["OAUTH"]):
+            headers = {"Authorization": "Bearer"+ " " + self.config.get("OAUTH","access_token")}
+            endpoint = "/services/data/v55.0/query/?q=SELECT+NAME+,+ID+,+BillingAddress+FROM+ACCOUNT"
+            response = requests.get(self.base_url+endpoint, headers = headers)
+            return response.content
+
+
+```
